@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 import axios from "axios";
-
 import CryptoJS from "crypto-js";
 
 function getFormattedSize(sizeBytes) {
@@ -58,13 +57,13 @@ export async function GET(req, res) {
     return NextResponse.json({ error: "Missing data" }, { status: 400 });
   }
   const secretKey = "1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d";
-  let url;
+  let urls;
   try {
     const decryptedBytes = CryptoJS.AES.decrypt(encryptedData, secretKey);
     const decryptedData = decryptedBytes.toString(CryptoJS.enc.Utf8);
-    const { token: decryptedToken, expiresAt } = JSON.parse(decryptedData);
-    url = decryptedToken;
-    console.log(url, expiresAt);
+    const { tokens, expiresAt } = JSON.parse(decryptedData);
+    urls = tokens;
+    console.log(urls, expiresAt);
     if (Date.now() > expiresAt) {
       return NextResponse.json({ error: "Expired token" }, { status: 401 });
     }
@@ -75,48 +74,62 @@ export async function GET(req, res) {
       { status: 400 }
     );
   }
+
   try {
-    const req = await axios.get(url, { headers, withCredentials: true });
-    const responseData = req.data;
-    const jsToken = findBetween(responseData, "fn%28%22", "%22%29");
-    const logid = findBetween(responseData, "dp-logid=", "&");
-    if (!jsToken || !logid) {
-      return NextResponse.json({ error: "Invalid response" }, { status: 400 });
-    }
-    const { searchParams: requestUrl, href } = new URL(
-      req.request.res.responseUrl
+    const responseDataList = await Promise.all(
+      urls.map(async (url) => {
+        try {
+          const req = await axios.get(url, { headers, withCredentials: true });
+          const responseData = req.data;
+          const jsToken = findBetween(responseData, "fn%28%22", "%22%29");
+          const logid = findBetween(responseData, "dp-logid=", "&");
+          if (!jsToken || !logid) {
+            return { error: "Invalid response" };
+          }
+          const { searchParams: requestUrl, href } = new URL(req.url);
+          
+          if (!requestUrl.has("surl")) {
+            return NextResponse.json({ error: "Missing data" }, { status: 400 });
+          }
+          
+          const surl = requestUrl.get("surl");
+          
+          const params = {
+            app_id: "250528",
+            web: "1",
+            channel: "dubox",
+            clienttype: "0",
+            jsToken: jsToken,
+            dplogid: logid,
+            page: "1",
+            num: "20",
+            order: "time",
+            desc: "1",
+            site_referer: href,
+            shorturl: surl,
+            root: "1",
+          };
+          
+          const req2 = await axios.get("https://www.1024tera.com/share/list", {
+            params,
+            headers,
+            withCredentials: true,
+          });
+          
+          const responseData2 = req2.data;
+          if (!("list" in responseData2)) {
+            return NextResponse.json({ error: "Invalid response" }, { status: 400 });
+          }
+          
+          return NextResponse.json(responseData2?.list[0], { status: 200 });
+          return responseData?.list[0];
+        } catch (error) {
+          return { error: `Error fetching data for URL: ${url}` };
+        }
+      })
     );
-    if (!requestUrl.has("surl")) {
-      return NextResponse.json({ error: "Missing data" }, { status: 400 });
-    }
-    const surl = requestUrl.get("surl");
 
-    const params = {
-      app_id: "250528",
-      web: "1",
-      channel: "dubox",
-      clienttype: "0",
-      jsToken: jsToken,
-      dplogid: logid,
-      page: "1",
-      num: "20",
-      order: "time",
-      desc: "1",
-      site_referer: href,
-      shorturl: surl,
-      root: "1",
-    };
-
-    const req2 = await axios.get("https://www.1024tera.com/share/list", {
-      params,
-      headers,
-      withCredentials: true,
-    });
-    const responseData2 = req2.data;
-    if (!"list" in responseData2) {
-      return NextResponse.json({ error: "Invalid response" }, { status: 400 });
-    }
-    return NextResponse.json(responseData2?.list[0], { status: 200 });
+    return NextResponse.json(responseDataList, { status: 200 });
   } catch (error) {
     return NextResponse.json({ error: "Unknown Error" }, { status: 400 });
   }
