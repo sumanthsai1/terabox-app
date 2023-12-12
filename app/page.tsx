@@ -5,7 +5,6 @@ import { Input } from "@/components/ui/input";
 import { useEffect, useState } from "react";
 import useSWR from "swr";
 import CryptoJS from "crypto-js";
-import Image from "next/image";
 
 const fetchWithToken = async (url: URL | RequestInfo) => {
   const res = await fetch(url);
@@ -18,23 +17,6 @@ const fetchWithToken = async (url: URL | RequestInfo) => {
 
   return await res.json();
 };
-
-function getFormattedSize(sizeBytes: number) {
-  let size, unit;
-
-  if (sizeBytes >= 1024 * 1024) {
-    size = sizeBytes / (1024 * 1024);
-    unit = "MB";
-  } else if (sizeBytes >= 1024) {
-    size = sizeBytes / 1024;
-    unit = "KB";
-  } else {
-    size = sizeBytes;
-    unit = "bytes";
-  }
-
-  return `${size.toFixed(2)} ${unit}`;
-}
 
 function convertEpochToDateTime(epochTimestamp: number) {
   const normalDate = new Date(epochTimestamp * 1000);
@@ -60,7 +42,6 @@ function isValidUrl(url: string | URL) {
     return false;
   }
 }
-
 function checkUrlPatterns(url: string) {
   const patterns = [
      /ww\.mirrobox\.com/,
@@ -100,13 +81,13 @@ function checkUrlPatterns(url: string) {
 }
 
 export default function Home() {
-  const [links, setLinks] = useState("");
+  const [link, setLink] = useState("");
   const [err, setError] = useState("");
-  const [tokens, setTokens] = useState<string[]>([]);
+  const [token, setToken] = useState("");
   const [disableInput, setdisableInput] = useState(false);
 
   const { data, error, isLoading } = useSWR(
-    tokens.length > 0 ? [`/api?data=${encodeURIComponent(JSON.stringify({ tokens }))}`] : null,
+    token ? [`/api?data=${encodeURIComponent(token)}`] : null,
     ([url]) => fetchWithToken(url),
     {
       revalidateIfStale: false,
@@ -118,7 +99,7 @@ export default function Home() {
   useEffect(() => {
     if (data || error) {
       setdisableInput(false);
-      setLinks("");
+      setLink("");
     }
     if (err || error) {
       setTimeout(() => {
@@ -130,34 +111,25 @@ export default function Home() {
   async function Submit() {
     setError("");
     setdisableInput(true);
-    if (!links) {
-      setError("Please enter links");
+    if (!link) {
+      setError("Please enter a link");
       return;
     }
-    
-    const linksArray = links.split(",").map(link => link.trim());
-
-    if (linksArray.length === 0) {
-      setError("Please enter valid links");
+    if (!checkUrlPatterns(link)) {
+      setError("Invalid Link");
       return;
     }
-
-    if (!linksArray.every(checkUrlPatterns)) {
-      setError("Invalid Link(s)");
-      return;
-    }
-
     const secretKey = "1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d";
     const expirationTime = Date.now() + 20000;
     const dataToEncrypt = JSON.stringify({
-      tokens: linksArray,
+      token: link,
       expiresAt: expirationTime,
     });
     const encryptedData = CryptoJS.AES.encrypt(
       dataToEncrypt,
       secretKey
     ).toString();
-    setTokens([encryptedData]);
+    setToken(encryptedData);
   }
 
   return (
@@ -178,14 +150,14 @@ export default function Home() {
         <h1 className="text-xl sm:text-3xl font-bold text-center text-white">
           Terabox Downloader
         </h1>
-        <p className="text-center text-white">Enter your Terabox links below (separated by commas)</p>
+        <p className="text-center text-white">Enter your Terabox link below</p>
         <div className="flex flex-col justify-center ">
           <div className="self-center text-black">
             <Input
               disabled={disableInput}
               className="max-w-80"
-              placeholder="Enter the links"
-              onChange={(e) => setLinks(e.target.value)}
+              placeholder="Enter the link"
+              onChange={(e) => setLink(e.target.value)}
             />
           </div>
         </div>
@@ -212,44 +184,10 @@ export default function Home() {
           <p className="bg-rose-500 text-white w-full text-center">{err}</p>
         )}
       </main>
-      {data && data.map((result, index) => (
-        <main key={index} className="my-10 py-10 bg-slate-700 rounded-lg items-start flex flex-col justify-start gap-2">
-          <div className="w-full">
-            <div className="rounded-md flex justify-center items-center ">
-              <Image
-                className="blur-md hover:filter-none rounded-md p-3 transition duration-300 ease-in-out transform scale-100 hover:scale-110 hover:rounded-md opacity-100 hover:opacity-100 "
-                style={{ objectFit: "contain" }}
-                loading="lazy"
-                src={result?.thumbs?.url1}
-                height={200}
-                width={200}
-                alt={""}
-              />
-            </div>
-          </div>
-          <div className="pl-3 pt-3">
-            <div className="pt-10"></div>
-            <h1 className="text-sm lg:text-xl text-white ">
-              Title:{" "}
-              <span className="text-white  text-md lg:text-2xl font-bold ">
-                {result?.server_filename}
-              </span>
-            </h1>
-            <h1 className="text-sm lg:text-xl text-white ">
-              File Size:{" "}
-              <span className="text-white text-md lg:text-2xl font-bold ">
-                {getFormattedSize(result.size)}
-              </span>
-            </h1>
-            <h1 className="text-sm lg:text-xl text-white ">
-              Uploaded On:{" "}
-              <span className="text-white  text-md lg:text-2xl font-bold ">
-                {convertEpochToDateTime(result.server_ctime)}
-              </span>
-            </h1>
-          </div>
+      {data && (
+        <main className="my-10 py-10 bg-slate-700 rounded-lg items-start flex flex-col justify-start gap-2">
           <Link
-            href={result?.dlink}
+            href={data?.dlink}
             target="_blank"
             rel="noopener noreferrer"
             className="py-0 text-xl font-bold text-white self-center"
@@ -263,7 +201,7 @@ export default function Home() {
             </Button>
           </Link>
         </main>
-      ))}
+      )}
     </div>
   );
 }
