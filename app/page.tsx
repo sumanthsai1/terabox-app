@@ -1,115 +1,3 @@
-"use client";
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { useEffect, useState } from "react";
-import useSWR from "swr";
-import CryptoJS from "crypto-js";
-import Image from "next/image";
-
-const fetchWithToken = async (url: URL | RequestInfo) => {
-  const res = await fetch(url);
-  if (!res.ok) {
-    const errorRes = await res.json();
-    const error = new Error();
-    error.message = errorRes?.error;
-    throw error;
-  }
-
-  return await res.json();
-};
-
-function getFormattedSize(sizeBytes: number) {
-  let size, unit;
-
-  if (sizeBytes >= 1024 * 1024) {
-    size = sizeBytes / (1024 * 1024);
-    unit = "MB";
-  } else if (sizeBytes >= 1024) {
-    size = sizeBytes / 1024;
-    unit = "KB";
-  } else {
-    size = sizeBytes;
-    unit = "bytes";
-  }
-
-  return `${size.toFixed(2)} ${unit}`;
-}
-
-function convertEpochToDateTime(epochTimestamp: number) {
-  const normalDate = new Date(epochTimestamp * 1000);
-
-  const options: Intl.DateTimeFormatOptions = {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-  };
-
-  const formattedDate = normalDate.toLocaleDateString(undefined, options);
-  return formattedDate;
-}
-
-function isValidUrl(url: string | URL) {
-  try {
-    new URL(url);
-    return true;
-  } catch (error) {
-    return false;
-  }
-}
-
-function checkUrlPatterns(url: string) {
-  const patterns = [
-    /ww\.mirrobox\.com/,
-    /www\.nephobox\.com/,
-    /freeterabox\.com/,
-    /www\.freeterabox\.com/,
-    /1024tera\.com/,
-    /4funbox\.co/,
-    /www\.4funbox\.com/,
-    /mirrobox\.com/,
-    /nephobox\.com/,
-    /terabox\.app/,
-    /terabox\.com/,
-    /www\.terabox\.ap/,
-    /terabox\.fun/,
-    /www\.terabox\.com/,
-    /www\.1024tera\.co/,
-    /www\.momerybox\.com/,
-    /teraboxapp\.com/,
-    /momerybox\.com/,
-    /tibibox\.com/,
-    /www\.tibibox\.com/,
-    /www\.teraboxapp\.com/,
-  ];
-
-  if (!isValidUrl(url)) {
-    return false;
-  }
-
-  for (const pattern of patterns) {
-    if (pattern.test(url)) {
-      return true;
-    }
-  }
-
-  return false;
-}
-
-export default function Home() {
-  const [link, setLink] = useState("");
-  const [err, setError] = useState("");
-  const [token, setToken] = useState("");
-  const [disableInput, setdisableInput] = useState(false);
-
-  const { data, error, isLoading } = useSWR(
-    token ? [`/api?data=${encodeURIComponent(token)}`] : null,
-    ([url]) => fetchWithToken(url),
-    {
-      revalidateIfStale: false,
 import { useState, useEffect } from "react";
 import useSWR from "swr";
 import CryptoJS from "crypto-js";
@@ -136,7 +24,7 @@ export default function Home() {
   const [token, setToken] = useState("");
   const [disableInput, setDisableInput] = useState(false);
 
-  const { error, isLoading } = useSWR(
+  const { data, error, isLoading } = useSWR(
     token ? [`/api?data=${encodeURIComponent(token)}`] : null,
     ([url]) => fetchWithToken(url),
     {
@@ -182,8 +70,13 @@ export default function Home() {
   }
 
   return (
-    <div className="pt-6 mx-12">
-      {/* ... (other parts of the code remain the same) */}
+  <div className="pt-6 mx-12">
+    <header className="mb-6">
+      <h1 className="text-3xl font-semibold text-gray-800 dark:text-gray-100">
+        Downloader
+      </h1>
+    </header>
+    <main className="flex flex-col items-center justify-center space-y-8">
       <div className="self-center text-black">
         <Input
           disabled={disableInput}
@@ -219,9 +112,9 @@ export default function Home() {
         <p className="bg-rose-500 text-white w-full text-center">
           {error.message}
         </p>
-      </main>
+      )}
       {data && (
-        <main className="my-10 py-10 bg-slate-700 rounded-lg items-start flex flex-col justify-start gap-2">
+        <div className="my-10 py-10 bg-slate-700 rounded-lg items-start flex flex-col justify-start gap-2">
           <div className="w-full">
             <div className="rounded-md flex justify-center items-center ">
               <Image
@@ -231,7 +124,7 @@ export default function Home() {
                 src={data?.thumbs?.url1}
                 height={200}
                 width={200}
-                alt={""}
+                alt=""
               />
             </div>
           </div>
@@ -245,7 +138,8 @@ export default function Home() {
             </h1>
             <h1 className="text-sm lg:text-xl text-white ">
               File Size:{" "}
-              <span className="text-whtFormattedSize(data.size)}
+              <span className="text-white  text-md lg:text-2xl font-bold ">
+                {getFormattedSize(data.size)}
               </span>
             </h1>
             <h1 className="text-sm lg:text-xl text-white ">
@@ -269,8 +163,8 @@ export default function Home() {
               Download
             </Button>
           </Link>
-        </main>
+        </div>
       )}
-    </div>
-  );
-}
+    </main>
+  </div>
+);
