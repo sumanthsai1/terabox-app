@@ -47,7 +47,7 @@ const headers = {
   "sec-ch-ua-platform": '"Windows"',
 };
 
-export async function GET(req, res) {
+async function GET(req, res) {
   const { searchParams: params } = new URL(req.url);
   if (!params.has("data")) {
     return NextResponse.json({ error: "Missing data" }, { status: 400 });
@@ -80,7 +80,7 @@ export async function GET(req, res) {
 
   // Iterate through URLs and download
   const downloadResults = await Promise.allSettled(
-    urls.map(async (url) => {
+      urls.map(async (url) => {
       try {
         const req = await axios.get(url, { headers, withCredentials: true });
         const responseData = req.data;
@@ -120,7 +120,14 @@ export async function GET(req, res) {
         if (!("list" in responseData2)) {
           return NextResponse.json({ error: "Invalid response" }, { status: 400 });
         }
-        
+        // Extract file based on surl
+let file;
+for (const item of responseData2?.list) {
+  if (item.surl === surl) {
+    file = item;
+    break;
+  }
+}
         // Return the first item in the list without details
         return NextResponse.json(responseData2?.list[0], { status: 200 });
 
