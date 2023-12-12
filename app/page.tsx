@@ -1,3 +1,4 @@
+"use client";
 import { useState, useEffect } from "react";
 import useSWR from "swr";
 import CryptoJS from "crypto-js";
@@ -5,6 +6,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+
+// rest of your code...
+
 
 const fetchWithToken = async (url: URL | RequestInfo) => {
   const res = await fetch(url);
