@@ -97,6 +97,7 @@ function checkUrlPatterns(url: string) {
 
   return false;
 }
+const SECRET_KEY = "1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d";
 
 
 export default function Home() {
@@ -137,17 +138,24 @@ export default function Home() {
       return;
     }
 
-    const secretKey = "1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d";
-    const expirationTime = Date.now() + 20000;
-    const dataToEncrypt = JSON.stringify({
-      token: linksArray,
-      expiresAt: expirationTime,
-    });
-    const encryptedData = CryptoJS.AES.encrypt(
-      dataToEncrypt,
-      secretKey
-    ).toString();
-    setToken(encryptedData);
+    try {
+      const expirationTime = Date.now() + 20000;
+      const dataToEncrypt = JSON.stringify({
+        token: linksArray,
+        expiresAt: expirationTime,
+      });
+
+      const encryptedData = CryptoJS.AES.encrypt(
+        dataToEncrypt,
+        SECRET_KEY
+      ).toString();
+
+      setToken(encryptedData);
+    } catch (error) {
+      console.error("Encryption error:", error);
+      setError("Error during encryption");
+      setDisableInput(false);
+    }
   }
 
   return (
