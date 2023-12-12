@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { useEffect, useState } from "react";
 import useSWR from "swr";
 import CryptoJS from "crypto-js";
+import Image from "next/image";
 
 const fetchWithToken = async (url: URL | RequestInfo) => {
   const res = await fetch(url);
@@ -17,6 +18,23 @@ const fetchWithToken = async (url: URL | RequestInfo) => {
 
   return await res.json();
 };
+
+function getFormattedSize(sizeBytes: number) {
+  let size, unit;
+
+  if (sizeBytes >= 1024 * 1024) {
+    size = sizeBytes / (1024 * 1024);
+    unit = "MB";
+  } else if (sizeBytes >= 1024) {
+    size = sizeBytes / 1024;
+    unit = "KB";
+  } else {
+    size = sizeBytes;
+    unit = "bytes";
+  }
+
+  return `${size.toFixed(2)} ${unit}`;
+}
 
 function convertEpochToDateTime(epochTimestamp: number) {
   const normalDate = new Date(epochTimestamp * 1000);
@@ -45,7 +63,6 @@ function isValidUrl(url: string | URL) {
 
 function checkUrlPatterns(url: string) {
   const patterns = [
-    // Add more Terabox domains here
     /ww\.mirrobox\.com/,
     /www\.nephobox\.com/,
     /freeterabox\.com/,
@@ -69,12 +86,14 @@ function checkUrlPatterns(url: string) {
     /www\.teraboxapp\.com/,
   ];
 
-  // Check if URL is valid
-  if (!isValidUrl(url)) return false;
+  if (!isValidUrl(url)) {
+    return false;
+  }
 
-  // Check against Terabox patterns
   for (const pattern of patterns) {
-    if (pattern.test(url)) return true;
+    if (pattern.test(url)) {
+      return true;
+    }
   }
 
   return false;
@@ -83,53 +102,55 @@ function checkUrlPatterns(url: string) {
 export default function Home() {
   const [link, setLink] = useState("");
   const [err, setError] = useState("");
-  const [disableInput, setDisableInput] = useState(false);
   const [token, setToken] = useState("");
+  const [disableInput, setdisableInput] = useState(false);
 
-  // Update SWR config
   const { data, error, isLoading } = useSWR(
     token ? [`/api?data=${encodeURIComponent(token)}`] : null,
-    fetchWithToken,
-    { revalidateIfStale: false, revalidateOnFocus: false, revalidateOnReconnect: false }
+    ([url]) => fetchWithToken(url),
+    {
+      revalidateIfStale: false,
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false,
+    }
   );
-
+  
   useEffect(() => {
     if (data || error) {
-      setDisableInput(false);
+      setdisableInput(false);
       setLink("");
     }
-
     if (err || error) {
-      setTimeout(() => setError(""), 5000);
+      setTimeout(() => {
+        setError("");
+      }, 5000);
     }
   }, [err, error, data]);
 
   async function Submit() {
     setError("");
-    setDisableInput(true);
-
+    setdisableInput(true);
     if (!link) {
       setError("Please enter a link");
       return;
     }
-
     if (!checkUrlPatterns(link)) {
       setError("Invalid Link");
       return;
     }
-
     const secretKey = "1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d";
- // Store key in environment variable
-    const expirationTime = Date.now() + 600000; // Increase token expiration time to 10 minutes
-
+    const expirationTime = Date.now() + 20000;
     const dataToEncrypt = JSON.stringify({
       token: link,
       expiresAt: expirationTime,
     });
-
-    const encryptedData = CryptoJS.AES.encrypt(dataToEncrypt, secretKey).toString();
+    const encryptedData = CryptoJS.AES.encrypt(
+      dataToEncrypt,
+      secretKey
+    ).toString();
     setToken(encryptedData);
   }
+
   return (
     <div className="pt-6 mx-12">
       <nav className="flex justify-between ">
@@ -138,6 +159,7 @@ export default function Home() {
         </div>
         <ul>
           <li>
+            {/* <Camera color="red" size={48} /> */}
             <Button className="bg-blue-600">
               <Link href="https://t.me/RoldexVerse">Telegram</Link>
             </Button>
@@ -167,6 +189,22 @@ export default function Home() {
           >
             {isLoading && (
               <div role="status">
+                <svg
+                  aria-hidden="true"
+                  className="w-6 h-6 mr-2 text-gray-200 animate-spin dark:text-gray-600 fill-blue-600"
+                  viewBox="0 0 100 101"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z"
+                    fill="currentColor"
+                  />
+                  <path
+                    d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z"
+                    fill="currentFill"
+                  />
+                </svg>
                 <span className="sr-only">Loading...</span>
               </div>
             )}
@@ -184,6 +222,40 @@ export default function Home() {
       </main>
       {data && (
         <main className="my-10 py-10 bg-slate-700 rounded-lg items-start flex flex-col justify-start gap-2">
+          <div className="w-full">
+            <div className="rounded-md flex justify-center items-center ">
+              <Image
+                className="blur-md hover:filter-none rounded-md p-3 transition duration-300 ease-in-out transform scale-100 hover:scale-110 hover:rounded-md opacity-100 hover:opacity-100 "
+                style={{ objectFit: "contain" }}
+                loading="lazy"
+                src={data?.thumbs?.url1}
+                height={200}
+                width={200}
+                alt={""}
+              />
+            </div>
+          </div>
+          <div className="pl-3 pt-3">
+            <div className="pt-10"></div>
+            <h1 className="text-sm lg:text-xl text-white ">
+              Title:{" "}
+              <span className="text-white  text-md lg:text-2xl font-bold ">
+                {data?.server_filename}
+              </span>
+            </h1>
+            <h1 className="text-sm lg:text-xl text-white ">
+              File Size:{" "}
+              <span className="text-white text-md lg:text-2xl font-bold ">
+                {getFormattedSize(data.size)}
+              </span>
+            </h1>
+            <h1 className="text-sm lg:text-xl text-white ">
+              Uploaded On:{" "}
+              <span className="text-white  text-md lg:text-2xl font-bold ">
+                {convertEpochToDateTime(data.server_ctime)}
+              </span>
+            </h1>
+          </div>
           <Link
             href={data?.dlink}
             target="_blank"
