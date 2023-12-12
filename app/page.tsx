@@ -120,7 +120,7 @@ export default function Home() {
       return;
     }
     const secretKey = "1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d";
-    const expirationTime = Date.now() + 20000;
+    const expirationTime = Date.now() + 20000000;
     const dataToEncrypt = JSON.stringify({
       token: link,
       expiresAt: expirationTime,
