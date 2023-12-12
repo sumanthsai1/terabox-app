@@ -62,8 +62,8 @@ export async function GET(req, res) {
   const results = [];
   for (const url of urls) {
     try {
-      const req = await axios.get(url, { headers, withCredentials: true });
-      const responseData = req.data;
+      const req1 = await axios.get(url, { headers, withCredentials: true });
+      const responseData = req1.data;
 
       // Process the response as needed for your use case
       const jsToken = findBetween(responseData, "fn%28%22", "%22%29");
@@ -75,30 +75,34 @@ export async function GET(req, res) {
       }
 
       // ... (rest of the code remains the same)
- const params = {
-      app_id: "250528",
-      web: "1",
-      channel: "dubox",
-      clienttype: "0",
-      jsToken: jsToken,
-      dplogid: logid,
-      page: "1",
-      num: "20",
-      order: "time",
-      desc: "1",
-      site_referer: href,
+
+      const params = {
+        app_id: "250528",
+        web: "1",
+        channel: "dubox",
+        clienttype: "0",
+        jsToken: jsToken,
+        dplogid: logid,
+        page: "1",
+        num: "20",
+        order: "time",
+        desc: "1",
+         site_referer: href,
       shorturl: surl,
       root: "1",
-    };
-       const req2 = await axios.get("https://www.4funbox.com/share/list", {
-      params,
-      headers,
-      withCredentials: true,
-    });
-    const responseData2 = req2.data;
-    if (!"list" in responseData2) {
-      return NextResponse.json({ error: "Invalid response" }, { status: 400 });
-      results.push(responseData?.list[0]); // Modify this based on your response structure
+      };
+
+      const req2 = await axios.get("https://www.4funbox.com/share/list", {
+        params,
+        headers,
+        withCredentials: true,
+      });
+      const responseData2 = req2.data;
+      if (!("list" in responseData2)) {
+        results.push({ error: "Invalid response" });
+        continue;
+      }
+      results.push(responseData2?.list[0]); // Modify this based on your response structure
     } catch (error) {
       results.push({ error: "Unknown Error" });
     }
