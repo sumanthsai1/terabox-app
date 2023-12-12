@@ -118,7 +118,7 @@ function Home() {
       return;
     }
 
-    const secretKey =  const secretKey = "1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d";
+    const secretKey = "1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d";
  // Store key in environment variable
     const expirationTime = Date.now() + 600000; // Increase token expiration time to 10 minutes
 
