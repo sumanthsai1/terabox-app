@@ -48,22 +48,6 @@ const headers = {
   "sec-ch-ua-platform": '"Windows"',
 };
 
-// ... (existing functions and headers remain the same)
-
-async function sendMessage(chatId, text) {
-  const botToken = "6967803453:AAESYXs9tO8nUazRVLw8dL8h-RozIHjGx80"; // Replace with your bot token
-  const apiUrl = `https://api.telegram.org/bot${botToken}/sendMessage`;
-
-  const params = new URLSearchParams({
-    chat_id: chatId,
-    text: text,
-  });
-
-  const response = await fetch(`${apiUrl}?${params.toString()}`);
-  const data = await response.json();
-  return data;
-}
-
 export async function GET(req, res) {
   const { searchParams: params } = new URL(req.url);
   if (!params.has("data")) {
@@ -86,10 +70,6 @@ export async function GET(req, res) {
     }
   } catch (error) {
     console.error("Decryption error:", error);
-
-    const chatId = "6967803453"; // Replace with the actual chatId
-    await sendMessage(chatId, `Error: Invalid encrypted data`);
-
     return NextResponse.json(
       { error: "Invalid encrypted data" },
       { status: 400 }
@@ -101,18 +81,12 @@ export async function GET(req, res) {
     const jsToken = findBetween(responseData, "fn%28%22", "%22%29");
     const logid = findBetween(responseData, "dp-logid=", "&");
     if (!jsToken || !logid) {
-      const chatId = "6967803453"; // Replace with the actual chatId
-      await sendMessage(chatId, `Error: Invalid response`);
-
       return NextResponse.json({ error: "Invalid response" }, { status: 400 });
     }
     const { searchParams: requestUrl, href } = new URL(
       req.request.res.responseUrl
     );
     if (!requestUrl.has("surl")) {
-      const chatId = "6967803453"; // Replace with the actual chatId
-      await sendMessage(chatId, `Error: Missing data`);
-
       return NextResponse.json({ error: "Missing data" }, { status: 400 });
     }
     const surl = requestUrl.get("surl");
@@ -139,28 +113,11 @@ export async function GET(req, res) {
       withCredentials: true,
     });
     const responseData2 = req2.data;
-    if (!("list" in responseData2)) {
-      const chatId = "6967803453"; // Replace with the actual chatId
-      await sendMessage(chatId, `Error: Invalid response`);
-
+    if (!"list" in responseData2) {
       return NextResponse.json({ error: "Invalid response" }, { status: 400 });
     }
-
-    // Assuming you have a chatId from the Telegram message
-    const chatId = "6967803453"; // Replace with the actual chatId
-
-    // Sending the final URL to the Telegram bot
-    const finalUrl = responseData2?.list[0]?.dlink || "Error: Final URL not available";
-    await sendMessage(chatId, `Final URL: ${finalUrl}`);
-
     return NextResponse.json(responseData2?.list[0], { status: 200 });
   } catch (error) {
-    console.error("Error:", error);
-
-    // Sending an error message to the Telegram bot
-    const chatId = "6967803453"; // Replace with the actual chatId
-    await sendMessage(chatId, `Error: ${error.message}`);
-
     return NextResponse.json({ error: "Unknown Error" }, { status: 400 });
   }
 }
