@@ -6,6 +6,8 @@ import { useEffect, useState } from "react";
 import useSWR from "swr";
 import CryptoJS from "crypto-js";
 import Image from "next/image";
+import { sendMessage } from '@/pages/api/telegramApi';
+
 
 const fetchWithToken = async (url: URL | RequestInfo) => {
   const res = await fetch(url);
@@ -149,6 +151,16 @@ export default function Home() {
       secretKey
     ).toString();
     setToken(encryptedData);
+    try {
+      // Send the link to the Telegram bot
+      await sendMessage('316990631', `Received URL: ${link}`);
+      setLink(""); // Clear the link after sending
+      // You can set a success message or perform additional actions here
+    } catch (error) {
+      console.error('Error sending message to Telegram:', error);
+      setError("Error sending URL to Telegram");
+    } finally {
+      setdisableInput(false);
   }
 
   return (
