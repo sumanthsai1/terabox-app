@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import useSWR from "swr";
 import CryptoJS from "crypto-js";
 import Image from "next/image";
-import { sendMessage } from '@/pages/api/telegramApi';
+import { sendMessage } from '@/app/api/telegramApi';
 
 
 const fetchWithToken = async (url: URL | RequestInfo) => {
