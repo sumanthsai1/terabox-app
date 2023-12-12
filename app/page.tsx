@@ -35,6 +35,70 @@ const fetchWithToken = async (url: URL | RequestInfo) => {
   return await res.json();
 };
 
+function convertEpochToDateTime(epochTimestamp: number) {
+  const normalDate = new Date(epochTimestamp * 1000);
+
+  const options: Intl.DateTimeFormatOptions = {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  };
+
+  const formattedDate = normalDate.toLocaleDateString(undefined, options);
+  return formattedDate;
+}
+
+function isValidUrl(url: string | URL) {
+  try {
+    new URL(url);
+    return true;
+  } catch (error) {
+    return false;
+  }
+}
+
+function checkUrlPatterns(url: string) {
+  const patterns = [
+    /ww\.mirrobox\.com/,
+    /www\.nephobox\.com/,
+    /freeterabox\.com/,
+    /www\.freeterabox\.com/,
+    /1024tera\.com/,
+    /4funbox\.co/,
+    /www\.4funbox\.com/,
+    /mirrobox\.com/,
+    /nephobox\.com/,
+    /terabox\.app/,
+    /terabox\.com/,
+    /www\.terabox\.ap/,
+    /terabox\.fun/,
+    /www\.terabox\.com/,
+    /www\.1024tera\.co/,
+    /www\.momerybox\.com/,
+    /teraboxapp\.com/,
+    /momerybox\.com/,
+    /tibibox\.com/,
+    /www\.tibibox\.com/,
+    /www\.teraboxapp\.com/,
+  ];
+
+  if (!isValidUrl(url)) {
+    return false;
+  }
+
+  for (const pattern of patterns) {
+    if (pattern.test(url)) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+
 export default function Home() {
   const [links, setLinks] = useState("");
   const [err, setError] = useState("");
