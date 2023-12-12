@@ -7,9 +7,22 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
-// rest of your code...
+function getFormattedSize(sizeBytes: number) {
+  let size, unit;
 
+  if (sizeBytes >= 1024 * 1024) {
+    size = sizeBytes / (1024 * 1024);
+    unit = "MB";
+  } else if (sizeBytes >= 1024) {
+    size = sizeBytes / 1024;
+    unit = "KB";
+  } else {
+    size = sizeBytes;
+    unit = "bytes";
+  }
 
+  return `${size.toFixed(2)} ${unit}`;
+}
 const fetchWithToken = async (url: URL | RequestInfo) => {
   const res = await fetch(url);
   if (!res.ok) {
