@@ -80,7 +80,7 @@ function checkUrlPatterns(url: string) {
   return false;
 }
 
-function Home() {
+export default function Home() {
   const [link, setLink] = useState("");
   const [err, setError] = useState("");
   const [disableInput, setDisableInput] = useState(false);
