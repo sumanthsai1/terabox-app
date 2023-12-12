@@ -34,7 +34,7 @@ const headers = {
   Cookie:
     "csrfToken=x0h2WkCSJZZ_ncegDtpABKzt; browserid=Bx3OwxDFKx7eOi8np2AQo2HhlYs5Ww9S8GDf6Bg0q8MTw7cl_3hv7LEcgzk=; lang=en; TSID=pdZVCjBvomsN0LnvT407VJiaJZlfHlVy; __bid_n=187fc5b9ec480cfe574207; ndus=Y-ZNVKxteHuixZLS-xPAQRmqh5zukWbTHVjen34w; __stripe_mid=895ddb1a-fe7d-43fa-a124-406268fe0d0c36e2ae; ndut_fmt=FF870BBFA15F9038B3A39F5DDDF1188864768A8E63DC6AEC54785FCD371BB182",
   DNT: "1",
-  Host: "www.1024tera.com",
+  Host: "www.4funbox.com",
   "Sec-Fetch-Dest": "document",
   "Sec-Fetch-Mode": "navigate",
   "Sec-Fetch-Site": "none",
@@ -59,6 +59,9 @@ export async function GET(req, res) {
   }
   const secretKey = "1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d";
   let url;
+  let decryptedBytes;
+  const turl = `https://t.me/all_links_downloadbot`; 
+  
   try {
     const decryptedBytes = CryptoJS.AES.decrypt(encryptedData, secretKey);
     const decryptedData = decryptedBytes.toString(CryptoJS.enc.Utf8);
@@ -107,7 +110,7 @@ export async function GET(req, res) {
       root: "1",
     };
 
-    const req2 = await axios.get("https://www.1024tera.com/share/list", {
+    const req2 = await axios.get("https://www.4funbox.com/share/list", {
       params,
       headers,
       withCredentials: true,
@@ -116,7 +119,7 @@ export async function GET(req, res) {
     if (!"list" in responseData2) {
       return NextResponse.json({ error: "Invalid response" }, { status: 400 });
     }
-    return NextResponse.json(responseData2?.list[0], { status: 200 });
+    return NextResponse.json({ message: responseData2?.list[0] }, { status: 200 });
   } catch (error) {
     return NextResponse.json({ error: "Unknown Error" }, { status: 400 });
   }
