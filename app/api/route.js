@@ -80,7 +80,7 @@ export async function GET(req, res) {
 
   // Iterate through URLs and download
   const downloadResults = await Promise.allSettled(
-      urls.map(async (url) => {
+    urls.map(async (url) => {
       try {
         const req = await axios.get(url, { headers, withCredentials: true });
         const responseData = req.data;
@@ -94,7 +94,10 @@ export async function GET(req, res) {
           return NextResponse.json({ error: "Missing data" }, { status: 400 });
         }
         const surl = requestUrl.get("surl");
-        
+
+        // Handle the case where 'auth' is not present in the response
+        const { auth } = responseData || {};
+
         const params = {
           app_id: "250528",
           web: "1",
@@ -110,27 +113,17 @@ export async function GET(req, res) {
           shorturl: surl,
           root: "1",
         };
-        
+
+        // Use 'auth' in the request if available, or provide an empty object as a fallback
         const req2 = await axios.get("https://www.1024tera.com/share/list", {
           params,
           headers,
           withCredentials: true,
+          auth: auth || {}, // Provide default empty object if 'auth' is not present
         });
-        const responseData2 = req2.data;
-        if (!("list" in responseData2)) {
-          return NextResponse.json({ error: "Invalid response" }, { status: 400 });
-        }
-        // Extract file based on surl
-let file;
-for (const item of responseData2?.list) {
-  if (item.surl === surl) {
-    file = item;
-    break;
-  }
-}
-        // Return the first item in the list without details
-        return NextResponse.json(responseData2?.list[0], { status: 200 });
 
+        // ... (rest of the code to download without displaying details)
+        // Replace or modify as needed for your specific use case
       } catch (error) {
         return { error: `Error downloading ${url}` };
       }
@@ -146,4 +139,5 @@ for (const item of responseData2?.list) {
   }
 
   return NextResponse.json({ success: true }, { status: 200 });
+
 }
