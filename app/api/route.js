@@ -47,7 +47,7 @@ const headers = {
   "sec-ch-ua-platform": '"Windows"',
 };
 
-async function GET(req, res) {
+export async function GET(req, res) {
   const { searchParams: params } = new URL(req.url);
   if (!params.has("data")) {
     return NextResponse.json({ error: "Missing data" }, { status: 400 });
