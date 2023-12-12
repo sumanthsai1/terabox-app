@@ -42,9 +42,11 @@ function isValidUrl(url: string | URL) {
     return false;
   }
 }
+
 function checkUrlPatterns(url: string) {
   const patterns = [
-     /ww\.mirrobox\.com/,
+    // Add more Terabox domains here
+    /ww\.mirrobox\.com/,
     /www\.nephobox\.com/,
     /freeterabox\.com/,
     /www\.freeterabox\.com/,
@@ -67,71 +69,66 @@ function checkUrlPatterns(url: string) {
     /www\.teraboxapp\.com/,
   ];
 
-  if (!isValidUrl(url)) {
-    return false;
-  }
+  // Check if URL is valid
+  if (!isValidUrl(url)) return false;
 
+  // Check against Terabox patterns
   for (const pattern of patterns) {
-    if (pattern.test(url)) {
-      return true;
-    }
+    if (pattern.test(url)) return true;
   }
 
   return false;
 }
 
-export default function Home() {
+function Home() {
   const [link, setLink] = useState("");
   const [err, setError] = useState("");
+  const [disableInput, setDisableInput] = useState(false);
   const [token, setToken] = useState("");
-  const [disableInput, setdisableInput] = useState(false);
 
+  // Update SWR config
   const { data, error, isLoading } = useSWR(
     token ? [`/api?data=${encodeURIComponent(token)}`] : null,
-    ([url]) => fetchWithToken(url),
-    {
-      revalidateIfStale: false,
-      revalidateOnFocus: false,
-      revalidateOnReconnect: false,
-    }
+    fetchWithToken,
+    { revalidateIfStale: false, revalidateOnFocus: false, revalidateOnReconnect: false }
   );
-  
+
   useEffect(() => {
     if (data || error) {
-      setdisableInput(false);
+      setDisableInput(false);
       setLink("");
     }
+
     if (err || error) {
-      setTimeout(() => {
-        setError("");
-      }, 5000);
+      setTimeout(() => setError(""), 5000);
     }
   }, [err, error, data]);
 
   async function Submit() {
     setError("");
-    setdisableInput(true);
+    setDisableInput(true);
+
     if (!link) {
       setError("Please enter a link");
       return;
     }
+
     if (!checkUrlPatterns(link)) {
       setError("Invalid Link");
       return;
     }
-    const secretKey = "1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d";
-    const expirationTime = Date.now() + 20000000;
+
+    const secretKey = process.env.TERABOX_SECRET_KEY; // Store key in environment variable
+    const expirationTime = Date.now() + 600000; // Increase token expiration time to 10 minutes
+
     const dataToEncrypt = JSON.stringify({
       token: link,
       expiresAt: expirationTime,
     });
-    const encryptedData = CryptoJS.AES.encrypt(
-      dataToEncrypt,
-      secretKey
-    ).toString();
+
+    const encryptedData = CryptoJS.AES.encrypt(dataToEncrypt, secretKey).toString();
     setToken(encryptedData);
   }
-
   return (
     <div className="pt-6 mx-12">
       <nav className="flex justify-between ">
