@@ -7,6 +7,22 @@ function findBetween(str, start, end) {
   const endIndex = str.indexOf(end, startIndex);
   return str.substring(startIndex, endIndex);
 }
+function getFormattedSize(sizeBytes) {
+  let size, unit;
+
+  if (sizeBytes >= 1024 * 1024) {
+    size = sizeBytes / (1024 * 1024);
+    unit = "MB";
+  } else if (sizeBytes >= 1024) {
+    size = sizeBytes / 1024;
+    unit = "KB";
+  } else {
+    size = sizeBytes;
+    unit = "bytes";
+  }
+
+  return `${size.toFixed(2)} ${unit}`;
+}
 
 const headers = {
   Accept:
@@ -16,7 +32,7 @@ const headers = {
   Cookie:
     "csrfToken=x0h2WkCSJZZ_ncegDtpABKzt; browserid=Bx3OwxDFKx7eOi8np2AQo2HhlYs5Ww9S8GDf6Bg0q8MTw7cl_3hv7LEcgzk=; lang=en; TSID=pdZVCjBvomsN0LnvT407VJiaJZlfHlVy; __bid_n=187fc5b9ec480cfe574207; ndus=Y-ZNVKxteHuixZLS-xPAQRmqh5zukWbTHVjen34w; __stripe_mid=895ddb1a-fe7d-43fa-a124-406268fe0d0c36e2ae; ndut_fmt=FF870BBFA15F9038B3A39F5DDDF1188864768A8E63DC6AEC54785FCD371BB182",
   DNT: "1",
-  Host: "www.4funbox.com",
+  Host: "www.1024tera.com",
   "Sec-Fetch-Dest": "document",
   "Sec-Fetch-Mode": "navigate",
   "Sec-Fetch-Site": "none",
@@ -29,6 +45,7 @@ const headers = {
   "sec-ch-ua-mobile": "?0",
   "sec-ch-ua-platform": '"Windows"',
 };
+
 
 export async function GET(req, res) {
   const { searchParams: params } = new URL(req.url);
@@ -92,7 +109,7 @@ export async function GET(req, res) {
       root: "1",
       };
 
-      const req2 = await axios.get("https://www.4funbox.com/share/list", {
+      const req2 = await axios.get("https://www.1024tera.com/share/list", {
         params,
         headers,
         withCredentials: true,
