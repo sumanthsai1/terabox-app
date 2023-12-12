@@ -6,8 +6,6 @@ import { useEffect, useState } from "react";
 import useSWR from "swr";
 import CryptoJS from "crypto-js";
 import Image from "next/image";
-import { sendMessage } from '@/app/api/telegramApi';
-
 
 const fetchWithToken = async (url: URL | RequestInfo) => {
   const res = await fetch(url);
@@ -128,34 +126,30 @@ export default function Home() {
       }, 5000);
     }
   }, [err, error, data]);
-async function Submit() {
-  setError("");
-  setdisableInput(true);
 
-  if (!link) {
-    setError("Please enter a link");
-    setdisableInput(false);
-    return;
+  async function Submit() {
+    setError("");
+    setdisableInput(true);
+    if (!link) {
+      setError("Please enter a link");
+      return;
+    }
+    if (!checkUrlPatterns(link)) {
+      setError("Invalid Link");
+      return;
+    }
+    const secretKey = "1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d";
+    const expirationTime = Date.now() + 20000;
+    const dataToEncrypt = JSON.stringify({
+      token: link,
+      expiresAt: expirationTime,
+    });
+    const encryptedData = CryptoJS.AES.encrypt(
+      dataToEncrypt,
+      secretKey
+    ).toString();
+    setToken(encryptedData);
   }
-
-  if (!checkUrlPatterns(link)) {
-    setError("Invalid Link");
-    setdisableInput(false);
-    return;
-  }
-
-  try {
-    // Send the link to the Telegram bot
-    await sendMessage('316990631', `Received URL: ${link}`);
-    setLink(""); // Clear the link after sending
-    // You can set a success message or perform additional actions here
-  } catch (error) {
-    console.error('Error sending message to Telegram:', error);
-    setError("Error sending URL to Telegram");
-  } finally {
-    setdisableInput(false);
-  }
-}
 
   return (
     <div className="pt-6 mx-12">
