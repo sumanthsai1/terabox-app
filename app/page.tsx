@@ -105,15 +105,27 @@ export default function Home() {
   const [token, setToken] = useState("");
   const [disableInput, setdisableInput] = useState(false);
 
-  const { data, error, isLoading } = useSWR(
-    token ? [`/api?data=${encodeURIComponent(token)}`] : null,
-    ([url]) => fetchWithToken(url),
-    {
-      revalidateIfStale: false,
-      revalidateOnFocus: false,
-      revalidateOnReconnect: false,
-    }
-  );
+  // In your app/page.tsx file
+const { data: detailsData, error: detailsError, isLoading: detailsLoading } = useSWR(
+  token ? [`/api/details?data=${encodeURIComponent(token)}`] : null,
+  ([url]) => fetchWithToken(url),
+  {
+    revalidateIfStale: false,
+    revalidateOnFocus: false,
+    revalidateOnReconnect: false,
+  }
+);
+
+const { data: downloadData, error: downloadError, isLoading: downloadLoading } = useSWR(
+  token ? [`/api/download?data=${encodeURIComponent(token)}`] : null,
+  ([url]) => fetchWithToken(url),
+  {
+    revalidateIfStale: false,
+    revalidateOnFocus: false,
+    revalidateOnReconnect: false,
+  }
+);
+
   
   useEffect(() => {
     if (data || error) {
