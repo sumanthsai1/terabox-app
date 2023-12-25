@@ -119,10 +119,6 @@ export default function Home() {
     if (data || error) {
       setdisableInput(false);
       setLink("");
-      // Directly trigger download if data is available
-      if (data) {
-        downloadFile(data);
-      }
     }
     if (err || error) {
       setTimeout(() => {
@@ -153,16 +149,27 @@ export default function Home() {
       secretKey
     ).toString();
     setToken(encryptedData);
-  }
 
-  // Function to trigger download
-  const downloadFile = (fileData) => {
-    const link = document.createElement("a");
-    link.href = fileData.dlink;
-    link.target = "_blank";
-    link.download = fileData.server_filename;
-    link.click();
-  };
+    // Directly initiate download
+    try {
+      const downloadUrl = data?.dlink;
+      if (downloadUrl) {
+        const downloadResponse = await fetch(downloadUrl);
+        const blob = await downloadResponse.blob();
+        const objectUrl = URL.createObjectURL(blob);
+
+        const a = document.createElement("a");
+        a.href = objectUrl;
+        a.download = data?.server_filename || "download";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(objectUrl);
+      }
+    } catch (error) {
+      setError("Error initiating download");
+    }
+  }
  return (
   <div className="pt-6 mx-12">
     <nav className="flex justify-between ">
