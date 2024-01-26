@@ -167,7 +167,8 @@ export default function Home() {
         URL.revokeObjectURL(objectUrl);
       }
     } catch (error) {
-      setError("Error initiating download");
+       console.error("Error initiating download:", error);
+        setError("Error initiating download");
     }
   }
  return (
