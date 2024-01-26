@@ -113,6 +113,7 @@ export async function GET(req, res) {
       withCredentials: true,
     });
     const responseData2 = req2.data;
+    console.log(responseData2);
     if (!"list" in responseData2) {
       return NextResponse.json({ error: "Invalid response" }, { status: 400 });
     }
