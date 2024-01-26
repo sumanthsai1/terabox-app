@@ -29,21 +29,21 @@ function findBetween(str, start, end) {
 const headers = {
   Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
   "Accept-Language": "en-US,en;q=0.9,te;q=0.8",
-  CacheControl: "max-age=0",
   Connection: "keep-alive",
   Cookie: "browserid=XHuy0htaNqVVxpExvcKc3Y7TkwouDTUeiqGuI1XunMflp98n9XRKYy6hYWo=; lang=en; __bid_n=18d3633e2e5c80bcda4207; _ga=GA1.1.455855118.1706011461; __stripe_mid=1daea916-e2b4-4894-ad0e-f2335c5daba4a61128; g_state={\"i_l\":0}; ndus=YunKf8eteHuie01e9Sgimx5FfHRVFx0h57hRI-tD; csrfToken=-IjL7Ejm7yZ1zx5vKUan0N1p; ndut_fmt=27E6EE0AF97D183385EDBDBE825A9BBF335BFA820CFE8085BA65E651007CFBC5; _ga_06ZNKL8C2E=GS1.1.1706266451.5.1.1706266467.44.0.0",
   DNT: "1",
   Host: "www.1024tera.com",
-  SecFetchDest: "document",
-  SecFetchMode: "navigate",
-  SecFetchSite: "same-origin",
-  SecFetchUser: "?1",
-  UpgradeInsecureRequests: "1",
-  UserAgent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
-  sec-ch-ua: "\"Not A(Brand\";v=\"99\", \"Google Chrome\";v=\"121\", \"Chromium\";v=\"121\"",
-  sec-ch-ua-mobile: "?0",
-  sec-ch-ua-platform: "\"Windows\""
+  "Sec-Fetch-Dest": "document",
+  "Sec-Fetch-Mode": "navigate",
+  "Sec-Fetch-Site": "same-origin",
+  "Sec-Fetch-User": "?1",
+  "Upgrade-Insecure-Requests": "1",
+  "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
+  "sec-ch-ua": "\"Not A(Brand\";v=\"99\", \"Google Chrome\";v=\"121\", \"Chromium\";v=\"121\"",
+  "sec-ch-ua-mobile": "?0",
+  "sec-ch-ua-platform": "\"Windows\"",
 };
+
 
 
 export async function GET(req, res) {
