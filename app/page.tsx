@@ -138,7 +138,7 @@ export default function Home() {
       setError("Invalid Link");
       return;
     }
-    const secretKey = "1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8d9f";
+    const secretKey = "1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9g";
     const expirationTime = Date.now() + 200000;
     const dataToEncrypt = JSON.stringify({
       token: link,
