@@ -6,7 +6,7 @@ module.exports = {
     remotePatterns: [
       {
         protocol: "https",
-        hostname: "data.4funbox.com",
+        hostname: "data.1024tera.com",
         port: "",
         pathname: "**",
       },
